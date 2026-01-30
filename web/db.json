@@ -1,0 +1,53 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Картофель молодой",
+      "imageUrl": "https://img.freepik.com/premium-photo/pile-potatoes-with-word-fall-bottom_875825-178277.jpg",
+      "barcodeValue": "5901234123457",
+      "barcodeFormat": "EAN_13"
+    },
+    {
+      "id": 2,
+      "name": "Помидор свежий",
+      "imageUrl": "https://img.freepik.com/free-photo/fresh-red-tomatoes_2829-13449.jpg",
+      "barcodeValue": "4601234123457",
+      "barcodeFormat": "EAN_13"
+    },
+    {
+      "id": 3,
+      "name": "Хлеб (эти мягкие французские булки)",
+      "imageUrl": "https://img.freepik.com/premium-photo/bread-products-white-background_392895-423763.jpg",
+      "barcodeValue": "4601234123464",
+      "barcodeFormat": "EAN_13"
+    },
+    {
+      "id": 4,
+      "name": "Лук репчатый",
+      "imageUrl": "https://img.freepik.com/premium-photo/onion-white-background-root-isolate-fresh-vegetables_537001-1222.jpg",
+      "barcodeValue": "5449000000996",
+      "barcodeFormat": "EAN_13"
+    },
+    {
+      "id": 5,
+      "name": "Шоколад горький",
+      "imageUrl": "https://img.freepik.com/free-photo/close-up-delicious-chocolate-bar_23-2150660956.jpg",
+      "barcodeValue": "7622210449931",
+      "barcodeFormat": "EAN_13"
+    },
+    {
+      "name": "Огурцы пупырчатые",
+      "imageUrl": "https://img.freepik.com/free-photo/cucumber-isolated_93675-131293.jpg",
+      "barcodeValue": "3670301377520",
+      "barcodeFormat": "EAN_13",
+      "id": 6
+    },
+    {
+      "name": "Кошачья морда",
+      "imageUrl": "https://img.freepik.com/free-photo/closeup-shot-fluffy-ginger-domestic-cat-looking-directly-white-background_181624-46543.jpg",
+      "barcodeValue": "9780201379624",
+      "barcodeFormat": "EAN_13",
+      "id": 7
+    }
+  ]
+}

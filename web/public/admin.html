@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка Zebraget</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        h1, h2 { color: #333; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="url"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; background-color: #007bff; color: white; font-size: 14px; }
+        button:hover { background-color: #0056b3; }
+        button.delete { background-color: #dc3545; }
+        button.delete:hover { background-color: #c82333; }
+        button.edit { background-color: #ffc107; color: black; }
+        button.edit:hover { background-color: #e0a800; }
+        button.cancel { background-color: #6c757d; }
+        button.cancel:hover { background-color: #5a6268; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        img.preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .error { color: red; font-size: 12px; margin-top: 5px; }
+        .btn-group { display: flex; gap: 5px; }
+        /* Simple responsiveness */
+        @media (max-width: 600px) {
+            th, td { font-size: 12px; padding: 5px; }
+            img.preview { width: 30px; height: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Zebraget Admin</h1>
+
+    <div class="container">
+        <h2 id="formTitle">Добавить товар</h2>
+        <form id="productForm">
+            <input type="hidden" id="productId">
+            <div class="form-group">
+                <label for="name">Название</label>
+                <input type="text" id="name" required placeholder="Например, Молоко">
+            </div>
+            <div class="form-group">
+                <label for="imageUrl">URL картинки</label>
+                <input type="url" id="imageUrl" required placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-group">
+                <label for="barcodeValue">Штрихкод (EAN-13)</label>
+                <input type="text" id="barcodeValue" required placeholder="13 цифр">
+                <div id="barcodeError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="barcodeFormat">Формат (по умолчанию EAN_13)</label>
+                <input type="text" id="barcodeFormat" value="EAN_13" placeholder="EAN_13">
+            </div>
+            <button type="submit" id="submitBtn">Сохранить</button>
+            <button type="button" class="cancel" id="cancelBtn" style="display:none;">Отмена</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Список товаров</h2>
+        <input type="text" id="searchInput" placeholder="Поиск по названию..." style="margin-bottom: 10px;">
+        <table id="productsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Img</th>
+                    <th>Название</th>
+                    <th>Штрихкод</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = '/products';
+        let allProducts = [];
+        let isEditing = false;
+
+        // Elements
+        const form = document.getElementById('productForm');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.querySelector('#productsTable tbody');
+        const barcodeError = document.getElementById('barcodeError');
+
+        // Fetch products
+        async function fetchProducts() {
+            try {
+                const res = await fetch(API_URL);
+                allProducts = await res.json();
+                renderTable(allProducts);
+            } catch (err) {
+                console.error('Error fetching products:', err);
+                alert('Ошибка загрузки данных');
+            }
+        }
+
+        // Render table
+        function renderTable(products) {
+            tableBody.innerHTML = '';
+            products.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.id}</td>
+                    <td><img src="${p.imageUrl}" alt="img" class="preview" onerror="this.src='https://via.placeholder.com/50?text=?'"></td>
+                    <td>${p.name}</td>
+                    <td>
+                        ${p.barcodeValue}<br>
+                        <small style="color:gray">${p.barcodeFormat || 'EAN_13'}</small>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="edit" onclick="startEdit(${p.id})">Edit</button>
+                            <button class="delete" onclick="deleteProduct(${p.id})">Del</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Search
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+            renderTable(filtered);
+        });
+
+        // Validate EAN-13
+        function validateEan13(code) {
+            if (!/^\d{13}$/.test(code)) return "Должно быть ровно 13 цифр";
+            
+            // Checksum validation
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+                sum += parseInt(code[i]) * (i % 2 === 0 ? 1 : 3);
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            if (checkDigit !== parseInt(code[12])) {
+                return `Неверная контрольная цифра. Ожидалась: ${checkDigit}, указана: ${code[12]}`;
+            }
+            return null;
+        }
+
+        // Form Submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('productId').value;
+            const name = document.getElementById('name').value;
+            const imageUrl = document.getElementById('imageUrl').value;
+            let barcodeValue = document.getElementById('barcodeValue').value;
+            let barcodeFormat = document.getElementById('barcodeFormat').value.trim();
+            if (!barcodeFormat) barcodeFormat = 'EAN_13';
+
+            // Validation
+            barcodeError.textContent = '';
+            if (barcodeFormat === 'EAN_13') {
+                const err = validateEan13(barcodeValue);
+                if (err) {
+                    barcodeError.textContent = err;
+                    return;
+                }
+            }
+
+            const product = { name, imageUrl, barcodeValue, barcodeFormat };
+
+            try {
+                if (isEditing) {
+                    await fetch(`${API_URL}/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(product)
+                    });
+                } else {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(product)
+                    });
+                }
+                resetForm();
+                fetchProducts();
+            } catch (err) {
+                console.error('Error saving:', err);
+                alert('Ошибка сохранения');
+            }
+        });
+
+        // Start Edit
+        window.startEdit = (id) => {
+            const p = allProducts.find(x => x.id == id);
+            if (!p) return;
+
+            document.getElementById('productId').value = p.id;
+            document.getElementById('name').value = p.name;
+            document.getElementById('imageUrl').value = p.imageUrl;
+            document.getElementById('barcodeValue').value = p.barcodeValue;
+            document.getElementById('barcodeFormat').value = p.barcodeFormat || 'EAN_13';
+
+            isEditing = true;
+            formTitle.textContent = `Редактировать товар #${id}`;
+            submitBtn.textContent = 'Обновить';
+            cancelBtn.style.display = 'inline-block';
+            window.scrollTo(0, 0);
+        };
+
+        // Delete
+        window.deleteProduct = async (id) => {
+            if (!confirm('Удалить товар?')) return;
+            try {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                fetchProducts();
+            } catch (err) {
+                console.error('Error deleting:', err);
+                alert('Ошибка удаления');
+            }
+        };
+
+        // Cancel
+        cancelBtn.addEventListener('click', resetForm);
+
+        function resetForm() {
+            form.reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('barcodeFormat').value = 'EAN_13'; // default
+            isEditing = false;
+            formTitle.textContent = 'Добавить товар';
+            submitBtn.textContent = 'Сохранить';
+            cancelBtn.style.display = 'none';
+            barcodeError.textContent = '';
+        }
+
+        // Init
+        fetchProducts();
+
+    </script>
+</body>
+</html>
