@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.zebraget.app-mergeDebugResources-64:/values-v23/values-v23.xml",
+            "outputFile": "com.example.zebraget.app-mergeDebugResources-66:/values-v23/values-v23.xml",
             "map": [
                 {
                     "source": "C:\\Users\\MegaLitr\\.gradle\\caches\\9.3.0\\transforms\\96ea682746651eb5ecc8c199611c8492\\workspace\\transformed\\cardview-1.0.0\\res\\values-v23\\values-v23.xml",

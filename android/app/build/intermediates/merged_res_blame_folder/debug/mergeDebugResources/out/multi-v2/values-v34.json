@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.zebraget.app-mergeDebugResources-64:/values-v34/values-v34.xml",
+            "outputFile": "com.example.zebraget.app-mergeDebugResources-66:/values-v34/values-v34.xml",
             "map": [
                 {
                     "source": "C:\\Users\\MegaLitr\\.gradle\\caches\\9.3.0\\transforms\\d1df347c8adb5cdab1ccca0553e73e7a\\workspace\\transformed\\material-1.11.0\\res\\values-v34\\values-v34.xml",

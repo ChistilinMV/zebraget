@@ -13,22 +13,22 @@
 11-->C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:5:22-64
 12
 13    <permission
-13-->[androidx.core:core:1.12.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\ed9f7387ea2e7fe2c3f67c5b72c15980\workspace\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+13-->[androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
 14        android:name="com.example.zebraget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-14-->[androidx.core:core:1.12.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\ed9f7387ea2e7fe2c3f67c5b72c15980\workspace\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+14-->[androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
 15        android:protectionLevel="signature" />
-15-->[androidx.core:core:1.12.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\ed9f7387ea2e7fe2c3f67c5b72c15980\workspace\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+15-->[androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
 16
 17    <uses-permission android:name="com.example.zebraget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-17-->[androidx.core:core:1.12.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\ed9f7387ea2e7fe2c3f67c5b72c15980\workspace\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
-17-->[androidx.core:core:1.12.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\ed9f7387ea2e7fe2c3f67c5b72c15980\workspace\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+17-->[androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
+17-->[androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
 18
 19    <application
 19-->C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:7:5-28:19
 20        android:allowBackup="true"
 20-->C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:8:9-35
 21        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-21-->[androidx.core:core:1.12.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\ed9f7387ea2e7fe2c3f67c5b72c15980\workspace\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+21-->[androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 22        android:debuggable="true"
 23        android:extractNativeLibs="false"
 24        android:icon="@mipmap/ic_launcher"
@@ -66,17 +66,17 @@
 41            </intent-filter>
 42        </activity>
 43        <activity
-43-->[androidx.compose.ui:ui-test-manifest:1.6.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\606f01691ea552bd3fbb429ad58a9c09\workspace\transformed\jetified-ui-test-manifest-1.6.1\AndroidManifest.xml:23:9-25:39
-44            android:name="androidx.activity.ComponentActivity"
-44-->[androidx.compose.ui:ui-test-manifest:1.6.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\606f01691ea552bd3fbb429ad58a9c09\workspace\transformed\jetified-ui-test-manifest-1.6.1\AndroidManifest.xml:24:13-63
+43-->[androidx.compose.ui:ui-tooling-android:1.7.2] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\737eb314c2e1c5f9bcf4c4e9939538fd\workspace\transformed\jetified-ui-tooling-release\AndroidManifest.xml:23:9-25:39
+44            android:name="androidx.compose.ui.tooling.PreviewActivity"
+44-->[androidx.compose.ui:ui-tooling-android:1.7.2] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\737eb314c2e1c5f9bcf4c4e9939538fd\workspace\transformed\jetified-ui-tooling-release\AndroidManifest.xml:24:13-71
 45            android:exported="true" />
-45-->[androidx.compose.ui:ui-test-manifest:1.6.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\606f01691ea552bd3fbb429ad58a9c09\workspace\transformed\jetified-ui-test-manifest-1.6.1\AndroidManifest.xml:25:13-36
+45-->[androidx.compose.ui:ui-tooling-android:1.7.2] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\737eb314c2e1c5f9bcf4c4e9939538fd\workspace\transformed\jetified-ui-tooling-release\AndroidManifest.xml:25:13-36
 46        <activity
-46-->[androidx.compose.ui:ui-tooling-android:1.6.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\9ce95963ba37dad5019ace0617b415c7\workspace\transformed\jetified-ui-tooling-release\AndroidManifest.xml:23:9-25:39
-47            android:name="androidx.compose.ui.tooling.PreviewActivity"
-47-->[androidx.compose.ui:ui-tooling-android:1.6.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\9ce95963ba37dad5019ace0617b415c7\workspace\transformed\jetified-ui-tooling-release\AndroidManifest.xml:24:13-71
+46-->[androidx.compose.ui:ui-test-manifest:1.7.2] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\723e058b0545063404cee9afdfd2d556\workspace\transformed\jetified-ui-test-manifest-1.7.2\AndroidManifest.xml:23:9-25:39
+47            android:name="androidx.activity.ComponentActivity"
+47-->[androidx.compose.ui:ui-test-manifest:1.7.2] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\723e058b0545063404cee9afdfd2d556\workspace\transformed\jetified-ui-test-manifest-1.7.2\AndroidManifest.xml:24:13-63
 48            android:exported="true" />
-48-->[androidx.compose.ui:ui-tooling-android:1.6.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\9ce95963ba37dad5019ace0617b415c7\workspace\transformed\jetified-ui-tooling-release\AndroidManifest.xml:25:13-36
+48-->[androidx.compose.ui:ui-test-manifest:1.7.2] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\723e058b0545063404cee9afdfd2d556\workspace\transformed\jetified-ui-test-manifest-1.7.2\AndroidManifest.xml:25:13-36
 49
 50        <provider
 50-->[androidx.emoji2:emoji2:1.3.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\1d7a835e04a1b29a36e4cf633493ae10\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
@@ -93,11 +93,11 @@
 56                android:value="androidx.startup" />
 56-->[androidx.emoji2:emoji2:1.3.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\1d7a835e04a1b29a36e4cf633493ae10\workspace\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
 57            <meta-data
-57-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\d6c9358458f51da0e6392f14b633dccf\workspace\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+57-->[androidx.lifecycle:lifecycle-process:2.8.3] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\084248a22eebb8389435fa3eb7e8ace3\workspace\transformed\jetified-lifecycle-process-2.8.3\AndroidManifest.xml:29:13-31:52
 58                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-58-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\d6c9358458f51da0e6392f14b633dccf\workspace\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+58-->[androidx.lifecycle:lifecycle-process:2.8.3] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\084248a22eebb8389435fa3eb7e8ace3\workspace\transformed\jetified-lifecycle-process-2.8.3\AndroidManifest.xml:30:17-78
 59                android:value="androidx.startup" />
-59-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\d6c9358458f51da0e6392f14b633dccf\workspace\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+59-->[androidx.lifecycle:lifecycle-process:2.8.3] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\084248a22eebb8389435fa3eb7e8ace3\workspace\transformed\jetified-lifecycle-process-2.8.3\AndroidManifest.xml:31:17-49
 60            <meta-data
 60-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\a29c8eb3fe725f9294fbe239dd7e1a7a\workspace\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
 61                android:name="androidx.profileinstaller.ProfileInstallerInitializer"

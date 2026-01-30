@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +46,7 @@ fun CatalogScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val filteredProducts by viewModel.filteredProducts.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val focusManager = LocalFocusManager.current
     var showSettings by remember { mutableStateOf(false) }
@@ -132,10 +135,16 @@ fun CatalogScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
-                        LazyColumn {
-                            items(filteredProducts) { product ->
-                                ProductItem(product, onClick = { onProductClick(product) })
-                                Divider()
+                        PullToRefreshBox(
+                            isRefreshing = isRefreshing,
+                            onRefresh = { viewModel.loadProducts(fromSwipe = true) },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                items(filteredProducts) { product ->
+                                    ProductItem(product, onClick = { onProductClick(product) })
+                                    Divider()
+                                }
                             }
                         }
                     }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -27,6 +28,9 @@ class ZebragetViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     // Derived state for UI
     val filteredProducts = combine(_rawProducts, _searchQuery) { state, query ->
         if (state is UiState.Content) {
@@ -41,9 +45,13 @@ class ZebragetViewModel(
         loadProducts()
     }
 
-    fun loadProducts() {
+    fun loadProducts(fromSwipe: Boolean = false) {
         viewModelScope.launch {
-            _rawProducts.value = UiState.Loading
+            if (fromSwipe) {
+                _isRefreshing.value = true
+            } else {
+                _rawProducts.value = UiState.Loading
+            }
             try {
                 // Try network
                 val products = repository.fetchFromNetwork()
@@ -56,6 +64,8 @@ class ZebragetViewModel(
                 } else {
                     _rawProducts.value = UiState.Error(e.localizedMessage ?: "Connection failed")
                 }
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
