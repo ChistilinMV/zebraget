@@ -7,6 +7,7 @@ import com.example.zebraget.data.network.ApiService
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import com.squareup.moshi.JsonClass
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
@@ -94,13 +95,20 @@ class ProductRepository(
     }
 
     private fun loadFromAssets(): Pair<List<Product>, List<ProductGroup>> {
-        val products = try {
-            val json = context.assets.open("products.json").bufferedReader().use { it.readText() }
-            val type = Types.newParameterizedType(List::class.java, Product::class.java)
-            val adapter: JsonAdapter<List<Product>> = moshi.adapter(type)
-            adapter.fromJson(json) ?: emptyList()
-        } catch (e: Exception) { emptyList() }
-        
-        return Pair(products, emptyList()) // No default groups in assets for now
+        return try {
+            val json = context.assets.open("db.json").bufferedReader().use { it.readText() }
+            val adapter = moshi.adapter(AssetData::class.java)
+            val data = adapter.fromJson(json)
+            Pair(data?.products ?: emptyList(), data?.groups ?: emptyList())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Pair(emptyList(), emptyList())
+        }
     }
+
+    @JsonClass(generateAdapter = true)
+    private data class AssetData(
+        val products: List<Product>,
+        val groups: List<ProductGroup>
+    )
 }

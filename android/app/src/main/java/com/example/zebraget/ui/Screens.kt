@@ -355,7 +355,7 @@ fun InfoDialog(onDismiss: () -> Unit) {
         text = {
             Column {
                 Text("ZebraGet", style = MaterialTheme.typography.titleLarge)
-                Text("Версия: 1.1", style = MaterialTheme.typography.bodyMedium)
+                Text("Версия: 1.2", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text("Связь с разработчиком:", style = MaterialTheme.typography.titleMedium)
