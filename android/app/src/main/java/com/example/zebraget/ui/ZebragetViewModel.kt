@@ -3,6 +3,7 @@ package com.example.zebraget.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zebraget.data.model.Product
+import com.example.zebraget.data.model.ProductGroup
 import com.example.zebraget.domain.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,54 +16,51 @@ import kotlinx.coroutines.launch
 sealed interface UiState {
     data object Loading : UiState
     data class Error(val message: String) : UiState
-    data class Content(val products: List<Product>, val isOffline: Boolean = false) : UiState
+    data class Content(
+        val products: List<Product>,
+        val groups: List<ProductGroup>,
+        val isOffline: Boolean = false
+    ) : UiState
 }
 
 class ZebragetViewModel(
     private val repository: ProductRepository
 ) : ViewModel() {
 
-    private val _rawProducts = MutableStateFlow<UiState>(UiState.Loading)
-    val uiState: StateFlow<UiState> = _rawProducts
+    private val _rawState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _rawState
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    private val _selectedGroupId = MutableStateFlow<Long?>(null)
+    val selectedGroupId: StateFlow<Long?> = _selectedGroupId.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    // Derived state for UI
-    val filteredProducts = combine(_rawProducts, _searchQuery) { state, query ->
-        if (state is UiState.Content) {
-            if (query.isBlank()) state.products
-            else state.products.filter { it.name.contains(query, ignoreCase = true) }
-        } else {
-            emptyList()
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     init {
-        loadProducts()
+        loadData()
     }
 
-    fun loadProducts(fromSwipe: Boolean = false) {
+    fun loadData(fromSwipe: Boolean = false) {
         viewModelScope.launch {
             if (fromSwipe) {
                 _isRefreshing.value = true
             } else {
-                _rawProducts.value = UiState.Loading
+                _rawState.value = UiState.Loading
             }
             try {
                 // Try network
-                val products = repository.fetchFromNetwork()
-                _rawProducts.value = UiState.Content(products, isOffline = false)
+                val (products, groups) = repository.fetchFromNetwork()
+                _rawState.value = UiState.Content(products, groups, isOffline = false)
             } catch (e: Exception) {
                 // Return cached/assets if available
-                val offlineProducts = repository.getCachedOrAssets()
-                if (offlineProducts.isNotEmpty()) {
-                    _rawProducts.value = UiState.Content(offlineProducts, isOffline = true)
+                val (offlineProducts, offlineGroups) = repository.getCachedOrAssets()
+                if (offlineProducts.isNotEmpty() || offlineGroups.isNotEmpty()) {
+                    _rawState.value = UiState.Content(offlineProducts, offlineGroups, isOffline = true)
                 } else {
-                    _rawProducts.value = UiState.Error(e.localizedMessage ?: "Connection failed")
+                    _rawState.value = UiState.Error(e.localizedMessage ?: "Connection failed")
                 }
             } finally {
                 _isRefreshing.value = false
@@ -72,5 +70,18 @@ class ZebragetViewModel(
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
+    }
+
+    fun selectGroup(groupId: Long?) {
+        _selectedGroupId.value = groupId
+    }
+
+    // Helper to get group name for a product
+    fun getGroupName(groupId: Long?): String? {
+        val state = _rawState.value
+        if (state is UiState.Content && groupId != null) {
+            return state.groups.find { it.id == groupId }?.name
+        }
+        return null
     }
 }

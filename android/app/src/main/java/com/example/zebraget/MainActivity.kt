@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                             onUpdateUrl = { newUrl ->
                                 updateNetwork(newUrl)
                                 currentUrl = newUrl
-                                viewModel.loadProducts()
+                                viewModel.loadData()
                             },
                             onProductClick = { product ->
                                 navController.navigate("barcode/${product.id}")

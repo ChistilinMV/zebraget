@@ -2,12 +2,14 @@ package com.example.zebraget.domain
 
 import android.content.Context
 import com.example.zebraget.data.model.Product
+import com.example.zebraget.data.model.ProductGroup
 import com.example.zebraget.data.network.ApiService
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.async
 import java.io.File
 import java.io.IOException
 
@@ -21,57 +23,84 @@ class ProductRepository(
         this.apiService = service
     }
 
-    suspend fun fetchFromNetwork(): List<Product> {
+    suspend fun fetchFromNetwork(): Pair<List<Product>, List<ProductGroup>> {
         return withContext(Dispatchers.IO) {
             if (apiService == null) throw IOException("Server not configured")
-            val products = apiService!!.getProducts()
-            saveToCache(products)
-            products
+            
+            val productsDeferred = async { apiService!!.getProducts() }
+            val groupsDeferred = async { 
+                try { apiService!!.getGroups() } catch (e: Exception) { emptyList() }
+            }
+            
+            val products = productsDeferred.await()
+            val groups = groupsDeferred.await()
+            
+            saveToCache(products, groups)
+            Pair(products, groups)
         }
     }
 
-    suspend fun getCachedOrAssets(): List<Product> {
+    suspend fun getCachedOrAssets(): Pair<List<Product>, List<ProductGroup>> {
         return withContext(Dispatchers.IO) {
-            val cached = loadFromCache()
-            if (cached.isNotEmpty()) cached else loadFromAssets()
+            val (cachedProducts, cachedGroups) = loadFromCache()
+            if (cachedProducts.isNotEmpty()) {
+                Pair(cachedProducts, cachedGroups)
+            } else {
+                loadFromAssets()
+            }
         }
     }
 
-    private fun saveToCache(products: List<Product>) {
+    private fun saveToCache(products: List<Product>, groups: List<ProductGroup>) {
         try {
-            val file = File(context.filesDir, "products_cache.json")
-            val type = Types.newParameterizedType(List::class.java, Product::class.java)
-            val adapter: JsonAdapter<List<Product>> = moshi.adapter(type)
-            val json = adapter.toJson(products)
-            file.writeText(json)
+            val fileProducts = File(context.filesDir, "products_cache.json")
+            val typeProducts = Types.newParameterizedType(List::class.java, Product::class.java)
+            val adapterProducts: JsonAdapter<List<Product>> = moshi.adapter(typeProducts)
+            fileProducts.writeText(adapterProducts.toJson(products))
+            
+            val fileGroups = File(context.filesDir, "groups_cache.json")
+            val typeGroups = Types.newParameterizedType(List::class.java, ProductGroup::class.java)
+            val adapterGroups: JsonAdapter<List<ProductGroup>> = moshi.adapter(typeGroups)
+            fileGroups.writeText(adapterGroups.toJson(groups))
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun loadFromCache(): List<Product> {
-        return try {
+    private fun loadFromCache(): Pair<List<Product>, List<ProductGroup>> {
+        val products = try {
             val file = File(context.filesDir, "products_cache.json")
-            if (!file.exists()) return emptyList()
-            val json = file.readText()
-            val type = Types.newParameterizedType(List::class.java, Product::class.java)
-            val adapter: JsonAdapter<List<Product>> = moshi.adapter(type)
-            adapter.fromJson(json) ?: emptyList()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
-        }
+            if (!file.exists()) emptyList()
+            else {
+                val json = file.readText()
+                val type = Types.newParameterizedType(List::class.java, Product::class.java)
+                val adapter: JsonAdapter<List<Product>> = moshi.adapter(type)
+                adapter.fromJson(json) ?: emptyList()
+            }
+        } catch (e: Exception) { emptyList() }
+        
+        val groups = try {
+            val file = File(context.filesDir, "groups_cache.json")
+            if (!file.exists()) emptyList()
+            else {
+                val json = file.readText()
+                val type = Types.newParameterizedType(List::class.java, ProductGroup::class.java)
+                val adapter: JsonAdapter<List<ProductGroup>> = moshi.adapter(type)
+                adapter.fromJson(json) ?: emptyList()
+            }
+        } catch (e: Exception) { emptyList() }
+        
+        return Pair(products, groups)
     }
 
-    private fun loadFromAssets(): List<Product> {
-        return try {
+    private fun loadFromAssets(): Pair<List<Product>, List<ProductGroup>> {
+        val products = try {
             val json = context.assets.open("products.json").bufferedReader().use { it.readText() }
             val type = Types.newParameterizedType(List::class.java, Product::class.java)
             val adapter: JsonAdapter<List<Product>> = moshi.adapter(type)
             adapter.fromJson(json) ?: emptyList()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
-        }
+        } catch (e: Exception) { emptyList() }
+        
+        return Pair(products, emptyList()) // No default groups in assets for now
     }
 }

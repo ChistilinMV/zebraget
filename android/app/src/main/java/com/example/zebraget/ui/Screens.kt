@@ -1,18 +1,23 @@
 package com.example.zebraget.ui
 
 import android.graphics.Bitmap
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -20,17 +25,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
 import coil.compose.AsyncImage
 import com.example.zebraget.data.model.Product
+import com.example.zebraget.data.model.ProductGroup
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 
@@ -45,9 +53,9 @@ fun CatalogScreen(
     onProductClick: (Product) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val filteredProducts by viewModel.filteredProducts.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val selectedGroupId by viewModel.selectedGroupId.collectAsState()
     val focusManager = LocalFocusManager.current
     var showSettings by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf(false) }
@@ -69,12 +77,33 @@ fun CatalogScreen(
         InfoDialog(onDismiss = { showInfo = false })
     }
 
+    val contentState = uiState as? UiState.Content
+    val currentGroupName = if (contentState != null && selectedGroupId != null) {
+        contentState.groups.find { it.id == selectedGroupId }?.name ?: "Группа"
+    } else {
+        null
+    }
+
+    // Handle back press if we are inside a group and not searching
+    BackHandler(enabled = selectedGroupId != null && searchQuery.isBlank()) {
+        viewModel.selectGroup(null)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ZebraGet Catalog") },
+                title = { 
+                    Text(if (selectedGroupId != null && searchQuery.isBlank()) currentGroupName ?: "Zebraget" else "ZebraGet Catalog") 
+                },
+                navigationIcon = {
+                    if (selectedGroupId != null && searchQuery.isBlank()) {
+                        IconButton(onClick = { viewModel.selectGroup(null) }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                },
                 actions = {
-                    IconButton(onClick = { viewModel.loadProducts() }) {
+                    IconButton(onClick = { viewModel.loadData() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }
                     IconButton(onClick = { showSettings = true }) {
@@ -117,7 +146,7 @@ fun CatalogScreen(
                     ) {
                         Text("Ошибка: ${state.message}", color = MaterialTheme.colorScheme.error)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.loadProducts() }) {
+                        Button(onClick = { viewModel.loadData() }) {
                             Text("Повторить")
                         }
                     }
@@ -135,21 +164,129 @@ fun CatalogScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+                        
                         PullToRefreshBox(
                             isRefreshing = isRefreshing,
-                            onRefresh = { viewModel.loadProducts(fromSwipe = true) },
+                            onRefresh = { viewModel.loadData(fromSwipe = true) },
                             modifier = Modifier.fillMaxSize()
                         ) {
+                            val itemsToShow = getItemsToShow(state, searchQuery, selectedGroupId)
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(filteredProducts) { product ->
-                                    ProductItem(product, onClick = { onProductClick(product) })
-                                    Divider()
+                                items(itemsToShow) { item ->
+                                    when (item) {
+                                        is CatalogItem.GroupItem -> {
+                                            ProductGroupItem(item.group, onClick = { viewModel.selectGroup(item.group.id) })
+                                        }
+                                        is CatalogItem.ProductItem -> {
+                                            ProductItem(item.product, onClick = { onProductClick(item.product) })
+                                            Divider()
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+sealed class CatalogItem {
+    data class GroupItem(val group: ProductGroup) : CatalogItem()
+    data class ProductItem(val product: Product) : CatalogItem()
+}
+
+fun getItemsToShow(state: UiState.Content, query: String, groupId: Long?): List<CatalogItem> {
+    if (query.isNotBlank()) {
+        // Search across all products
+        return state.products
+            .filter { it.name.contains(query, ignoreCase = true) }
+            .map { CatalogItem.ProductItem(it) }
+    }
+    
+    if (groupId == null) {
+        // Root view: show groups, then products without groups
+        val groups = state.groups.map { CatalogItem.GroupItem(it) }
+        val productsNoGroup = state.products
+            .filter { it.groupId == null }
+            .map { CatalogItem.ProductItem(it) }
+        return groups + productsNoGroup
+    } else {
+        // Group view: show products in this group
+        return state.products
+            .filter { it.groupId == groupId }
+            .map { CatalogItem.ProductItem(it) }
+    }
+}
+
+@Composable
+fun ProductGroupItem(group: ProductGroup, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = group.imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop,
+                error = rememberVectorPainter(Icons.Default.Folder)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = group.name, 
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Open group",
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    }
+}
+
+@Composable
+fun ProductItem(product: Product, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = product.imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop,
+            error = rememberVectorPainter(Icons.Default.Warning)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(text = product.name, style = MaterialTheme.typography.bodyLarge)
+            Text(text = product.barcodeValue, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
     }
 }
@@ -218,7 +355,7 @@ fun InfoDialog(onDismiss: () -> Unit) {
         text = {
             Column {
                 Text("ZebraGet", style = MaterialTheme.typography.titleLarge)
-                Text("Версия: 1.0", style = MaterialTheme.typography.bodyMedium)
+                Text("Версия: 1.1", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text("Связь с разработчиком:", style = MaterialTheme.typography.titleMedium)
@@ -236,27 +373,6 @@ fun InfoDialog(onDismiss: () -> Unit) {
     )
 }
 
-@Composable
-fun ProductItem(product: Product, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            model = product.imageUrl,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            contentScale = ContentScale.Crop,
-            error = rememberVectorPainter(Icons.Default.Warning) // Placeholderish
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text = product.name, style = MaterialTheme.typography.bodyLarge)
-    }
-}
-
 // Helper for placeholder
 @Composable
 fun rememberVectorPainter(image: androidx.compose.ui.graphics.vector.ImageVector) = 
@@ -266,14 +382,10 @@ fun rememberVectorPainter(image: androidx.compose.ui.graphics.vector.ImageVector
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BarcodeScreen(
-    productId: String?, // Passed from nav arguments
+    productId: String?,
     viewModel: ZebragetViewModel,
     onBack: () -> Unit
 ) {
-    // Ideally we pass objects, but with nav it's usually ID. 
-    // For simplicity, we can find the product in the VM list. Use a 'derived' approach or simple find.
-    // NOTE: In a real app we'd fetch strictly by ID, but here we rely on the loaded list.
-    
     val uiState by viewModel.uiState.collectAsState()
     val product = (uiState as? UiState.Content)?.products?.find { it.id.toString() == productId }
 
@@ -282,10 +394,7 @@ fun BarcodeScreen(
             TopAppBar(
                 title = { Text("Barcode") },
                 navigationIcon = {
-                    // Back logic handled by system back usually if no icon, 
-                    // or add an ArrowBack icon button here calling onBack()
                     IconButton(onClick = onBack) {
-                         // Default icons might not be imported, let's just use Text "<" or skip nav icon since back press works
                          Text("<", fontSize = 24.sp, modifier = Modifier.padding(horizontal = 12.dp))
                     }
                 }
@@ -338,7 +447,6 @@ fun ProductBarcodeDetail(product: Product) {
 
 fun validateEan13(code: String): Boolean {
     if (code.length != 13 || !code.all { it.isDigit() }) return false
-    // detailed checksum
     val sum = code.take(12).mapIndexed { i, c ->
         c.toString().toInt() * (if (i % 2 == 0) 1 else 3)
     }.sum()
@@ -350,8 +458,7 @@ fun generateBarcode(value: String, format: String): Bitmap? {
     return try {
         val zxingFormat = when(format) {
             "EAN_13" -> BarcodeFormat.EAN_13
-            // Add others if needed
-            else -> BarcodeFormat.EAN_13 // Fallback per requirement
+            else -> BarcodeFormat.EAN_13 
         }
         val writer = MultiFormatWriter()
         val bitMatrix = writer.encode(value, zxingFormat, 600, 300)

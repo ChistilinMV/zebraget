@@ -1,18 +1,27 @@
 {
+  "groups": [
+    {
+      "id": 1778966217863,
+      "name": "Овощи",
+      "imageUrl": "https://img.freepik.com/free-psd/vibrant-vegetable-harvest-colorful-collection-fresh-produce_191095-79960.jpg"
+    }
+  ],
   "products": [
     {
       "id": 1,
       "name": "Картофель молодой",
       "imageUrl": "https://img.freepik.com/premium-photo/pile-potatoes-with-word-fall-bottom_875825-178277.jpg",
       "barcodeValue": "5901234123457",
-      "barcodeFormat": "EAN_13"
+      "barcodeFormat": "EAN_13",
+      "groupId": 1778966217863
     },
     {
       "id": 2,
       "name": "Помидор свежий",
       "imageUrl": "https://img.freepik.com/free-photo/fresh-red-tomatoes_2829-13449.jpg",
       "barcodeValue": "4601234123457",
-      "barcodeFormat": "EAN_13"
+      "barcodeFormat": "EAN_13",
+      "groupId": 1778966217863
     },
     {
       "id": 3,
@@ -26,7 +35,8 @@
       "name": "Лук репчатый",
       "imageUrl": "https://img.freepik.com/premium-photo/onion-white-background-root-isolate-fresh-vegetables_537001-1222.jpg",
       "barcodeValue": "5449000000996",
-      "barcodeFormat": "EAN_13"
+      "barcodeFormat": "EAN_13",
+      "groupId": 1778966217863
     },
     {
       "id": 5,
@@ -40,7 +50,8 @@
       "imageUrl": "https://img.freepik.com/free-photo/cucumber-isolated_93675-131293.jpg",
       "barcodeValue": "3670301377520",
       "barcodeFormat": "EAN_13",
-      "id": 6
+      "id": 6,
+      "groupId": 1778966217863
     },
     {
       "name": "Кошачья морда",
