@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zebraget Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #4f46e5;
@@ -205,11 +206,15 @@
 <body>
 
     <nav class="navbar">
-        <h1>Zebraget Admin</h1>
+		<!-- Логотип ZebraGet -->
+        <h1 style="font-family: 'Arial Black', sans-serif; font-size: 40px; letter-spacing: -1px;">
+			<span style="background: #000; color: #fff; padding: 0 5px; border-radius: 4px 0 0 4px;">Zebra</span><span style="background: #fff; color: #000; border: 3px solid #000; padding: 0 5px; border-radius: 0 4px 4px 0;">Get</span>
+			<span style="font-family: 'Segoe UI', sans-serif; font-weight: 200; font-size: 24px; color: #000; margin-left: 10px;">/ Admin</span>
+		</h1>
         <div class="nav-links">
             <button class="active" onclick="switchTab('products')">Товары</button>
             <button onclick="switchTab('groups')">Группы</button>
-            <button onclick="switchTab('settings')">Настройки</button>
+            <button onclick="switchTab('settings')">База</button>
         </div>
     </nav>
 
@@ -254,7 +259,6 @@
             <div class="card">
                 <div class="card-header">
                     <h2>Список товаров</h2>
-                    <input type="text" id="p-search" placeholder="Поиск..." style="width: 250px;">
                 </div>
                 <table>
                     <thead>
@@ -264,6 +268,13 @@
                             <th>Штрихкод</th>
                             <th>Группа</th>
                             <th>Действия</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th><input type="text" id="p-search" placeholder="Поиск по названию..." style="width: 100%; font-weight: normal;"></th>
+                            <th><input type="text" id="p-search-barcode" placeholder="Поиск по штрихкоду..." style="width: 100%; font-weight: normal;"></th>
+                            <th><select id="p-search-group" style="width: 100%; font-weight: normal;"><option value="">Все группы</option></select></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody"></tbody>
@@ -307,6 +318,11 @@
                             <th>Название</th>
                             <th>Действия</th>
                         </tr>
+                        <tr>
+                            <th></th>
+                            <th><input type="text" id="g-search" placeholder="Поиск по названию..." style="width: 100%; font-weight: normal;"></th>
+                            <th></th>
+                        </tr>
                     </thead>
                     <tbody id="groupsTableBody"></tbody>
                 </table>
@@ -320,14 +336,25 @@
                     <h2>Управление базой данных</h2>
                 </div>
                 <p style="color: var(--text-muted); margin-bottom: 2rem;">
-                    Здесь вы можете скачать текущую базу данных в формате JSON или загрузить новую. 
+                    Здесь вы можете скачать текущую базу данных в формате JSON или XLSX, либо загрузить новую. 
                     Внимание: загрузка новой базы полностью перезапишет текущие данные!
                 </p>
-                <div style="display: flex; gap: 1rem;">
-                    <button class="btn btn-success" onclick="exportDB()">Экспорт БД (Скачать)</button>
-                    <div>
-                        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDB(event)">
-                        <button class="btn btn-danger" onclick="document.getElementById('importFile').click()">Импорт БД (Загрузить)</button>
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- XLSX -->
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="btn btn-success" onclick="exportXLSX()">Экспорт БД (XLSX)</button>
+                        <div>
+                            <input type="file" id="importXLSXFile" accept=".xlsx, .xls" style="display:none;" onchange="importXLSX(event)">
+                            <button class="btn btn-danger" onclick="document.getElementById('importXLSXFile').click()">Импорт БД (XLSX)</button>
+                        </div>
+                    </div>
+                    <!-- JSON -->
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="btn btn-success" onclick="exportDB()">Экспорт БД (JSON)</button>
+                        <div>
+                            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDB(event)">
+                            <button class="btn btn-danger" onclick="document.getElementById('importFile').click()">Импорт БД (JSON)</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -376,20 +403,28 @@
         // --- Render Groups ---
         function renderGroupsSelect() {
             const select = document.getElementById('p-group');
+            const searchSelect = document.getElementById('p-search-group');
+            
             select.innerHTML = '<option value="">Без группы</option>';
+            searchSelect.innerHTML = '<option value="">Все группы</option>';
+            
             groups.forEach(g => {
                 select.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+                searchSelect.innerHTML += `<option value="${g.id}">${g.name}</option>`;
             });
         }
 
         function renderGroups() {
             const tbody = document.getElementById('groupsTableBody');
+            const term = document.getElementById('g-search').value.toLowerCase();
+            const filtered = groups.filter(g => g.name.toLowerCase().includes(term));
+            
             tbody.innerHTML = '';
-            if (groups.length === 0) {
+            if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="empty-state">Нет групп</td></tr>`;
                 return;
             }
-            groups.forEach(g => {
+            filtered.forEach(g => {
                 tbody.innerHTML += `
                     <tr>
                         <td><img src="${g.imageUrl}" class="preview" onerror="this.src='https://via.placeholder.com/48'"></td>
@@ -404,12 +439,22 @@
                 `;
             });
         }
+        
+        document.getElementById('g-search').addEventListener('input', renderGroups);
 
         // --- Render Products ---
         function renderProducts() {
             const tbody = document.getElementById('productsTableBody');
-            const term = document.getElementById('p-search').value.toLowerCase();
-            const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+            const termName = document.getElementById('p-search').value.toLowerCase();
+            const termBarcode = document.getElementById('p-search-barcode').value.toLowerCase();
+            const filterGroup = document.getElementById('p-search-group').value;
+
+            const filtered = products.filter(p => {
+                const matchName = p.name.toLowerCase().includes(termName);
+                const matchBarcode = p.barcodeValue && String(p.barcodeValue).toLowerCase().includes(termBarcode);
+                const matchGroup = filterGroup === "" || String(p.groupId) === filterGroup;
+                return matchName && matchBarcode && matchGroup;
+            });
 
             tbody.innerHTML = '';
             if (filtered.length === 0) {
@@ -437,6 +482,8 @@
         }
 
         document.getElementById('p-search').addEventListener('input', renderProducts);
+        document.getElementById('p-search-barcode').addEventListener('input', renderProducts);
+        document.getElementById('p-search-group').addEventListener('change', renderProducts);
 
         // --- Product CRUD ---
         document.getElementById('productForm').addEventListener('submit', async (e) => {
@@ -609,6 +656,90 @@
                 }
             };
             reader.readAsText(file);
+            e.target.value = ''; // reset
+        };
+
+        window.exportXLSX = () => {
+            if (!products || !groups) {
+                alert('Данные еще не загружены');
+                return;
+            }
+            
+            const wb = XLSX.utils.book_new();
+            
+            const wsProducts = XLSX.utils.json_to_sheet(products);
+            const wsGroups = XLSX.utils.json_to_sheet(groups);
+
+            // Убираем экспоненциальный формат для больших чисел (ID)
+            const formatWs = (ws) => {
+                for (let key in ws) {
+                    if (key[0] === '!') continue;
+                    if (typeof ws[key].v === 'number' && ws[key].v > 9999999999) {
+                        ws[key].z = '0';
+                    }
+                }
+            };
+            
+            formatWs(wsProducts);
+            formatWs(wsGroups);
+            
+            XLSX.utils.book_append_sheet(wb, wsProducts, "Products");
+            XLSX.utils.book_append_sheet(wb, wsGroups, "Groups");
+            
+            XLSX.writeFile(wb, "database.xlsx");
+        };
+
+        window.importXLSX = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const data = new Uint8Array(ev.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const payload = {
+                        products: [],
+                        groups: []
+                    };
+                    
+                    if (workbook.Sheets["Products"]) {
+                        const rawProducts = XLSX.utils.sheet_to_json(workbook.Sheets["Products"]);
+                        payload.products = rawProducts.map(p => ({
+                            ...p,
+                            id: p.id ? Number(p.id) : Date.now(),
+                            groupId: p.groupId ? Number(p.groupId) : null,
+                            barcodeValue: p.barcodeValue != null ? String(p.barcodeValue) : ""
+                        }));
+                    }
+                    if (workbook.Sheets["Groups"]) {
+                        const rawGroups = XLSX.utils.sheet_to_json(workbook.Sheets["Groups"]);
+                        payload.groups = rawGroups.map(g => ({
+                            ...g,
+                            id: g.id ? Number(g.id) : Date.now()
+                        }));
+                    }
+                    
+                    const res = await fetch(`${API}/api/import`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (res.ok) {
+                        alert('База данных успешно импортирована из XLSX!');
+                        loadData();
+                    } else {
+                        const err = await res.json();
+                        alert('Ошибка импорта: ' + (err.error || 'Неизвестная ошибка'));
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Ошибка обработки XLSX файла');
+                }
+            };
+            reader.readAsArrayBuffer(file);
             e.target.value = ''; // reset
         };
 

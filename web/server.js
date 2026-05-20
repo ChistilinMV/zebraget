@@ -4,6 +4,12 @@ const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
 
 // Set default middlewares (logger, static, cors and no-cache)
+server.use((req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  }
+  next();
+});
 server.use(middlewares);
 
 // Add custom logic if needed, but defaults serve ./public
