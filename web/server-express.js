@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = 3000;
@@ -43,12 +44,42 @@ if (!db.groups) db.groups = [];
 if (!db.products) db.products = [];
 writeDB(db);
 
+// --- AUTHENTICATION ---
+const activeTokens = new Set();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Mva5n$M9';
+
+app.post('/api/login', (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+        const token = crypto.randomBytes(32).toString('hex');
+        activeTokens.add(token);
+        res.json({ success: true, token });
+    } else {
+        res.status(401).json({ error: 'Неверный пароль' });
+    }
+});
+
+const requireAuth = (req, res, next) => {
+    let token;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (!token || !activeTokens.has(token)) {
+        return res.status(401).json({ error: 'Не авторизован' });
+    }
+    next();
+};
+
 // --- GROUPS API ---
 app.get('/groups', (req, res) => {
     res.json(readDB().groups);
 });
 
-app.post('/groups', (req, res) => {
+app.post('/groups', requireAuth, (req, res) => {
     const db = readDB();
     const newGroup = {
         id: Date.now(), // simple ID generation
@@ -60,7 +91,7 @@ app.post('/groups', (req, res) => {
     res.status(201).json(newGroup);
 });
 
-app.put('/groups/:id', (req, res) => {
+app.put('/groups/:id', requireAuth, (req, res) => {
     const db = readDB();
     const id = parseInt(req.params.id, 10);
     const index = db.groups.findIndex(g => g.id === id);
@@ -71,7 +102,7 @@ app.put('/groups/:id', (req, res) => {
     res.json(db.groups[index]);
 });
 
-app.delete('/groups/:id', (req, res) => {
+app.delete('/groups/:id', requireAuth, (req, res) => {
     const db = readDB();
     const id = parseInt(req.params.id, 10);
     
@@ -107,7 +138,7 @@ app.get('/products/:id', (req, res) => {
     res.json(product);
 });
 
-app.post('/products', (req, res) => {
+app.post('/products', requireAuth, (req, res) => {
     const db = readDB();
     const newProduct = {
         id: Date.now(),
@@ -122,7 +153,7 @@ app.post('/products', (req, res) => {
     res.status(201).json(newProduct);
 });
 
-app.patch('/products/:id', (req, res) => {
+app.patch('/products/:id', requireAuth, (req, res) => {
     const db = readDB();
     const id = parseInt(req.params.id, 10);
     const index = db.products.findIndex(p => p.id === id);
@@ -139,7 +170,7 @@ app.patch('/products/:id', (req, res) => {
     res.json(db.products[index]);
 });
 
-app.delete('/products/:id', (req, res) => {
+app.delete('/products/:id', requireAuth, (req, res) => {
     const db = readDB();
     const id = parseInt(req.params.id, 10);
     const index = db.products.findIndex(p => p.id === id);
@@ -151,11 +182,11 @@ app.delete('/products/:id', (req, res) => {
 });
 
 // --- IMPORT / EXPORT API ---
-app.get('/api/export', (req, res) => {
+app.get('/api/export', requireAuth, (req, res) => {
     res.download(DB_PATH, 'db.json');
 });
 
-app.post('/api/import', (req, res) => {
+app.post('/api/import', requireAuth, (req, res) => {
     if (!req.body || typeof req.body !== 'object') {
         return res.status(400).json({ error: 'Invalid JSON body' });
     }
