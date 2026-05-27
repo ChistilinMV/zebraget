@@ -16,6 +16,7 @@ import com.example.zebraget.ui.BarcodeScreen
 import com.example.zebraget.ui.CatalogScreen
 import com.example.zebraget.ui.LoginScreen
 import com.example.zebraget.ui.LoginViewModel
+import com.example.zebraget.ui.SettingsDialog
 import com.example.zebraget.ui.ZebragetViewModel
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -40,7 +41,6 @@ class MainActivity : ComponentActivity() {
         val defaultUrl = "http://10.0.2.2:3000/"
         val savedUrl = prefs.getString("server_url", defaultUrl) ?: defaultUrl
         val savedIsDark = prefs.getBoolean("is_dark_theme", false)
-        val initialToken = prefs.getString("auth_token", null)
 
         // Manual DI for simplicity
         val moshi = Moshi.Builder()
@@ -87,15 +87,33 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             var currentUrl by remember { mutableStateOf(savedUrl) }
             var isDarkTheme by remember { mutableStateOf(savedIsDark) }
+            var showSettingsInLogin by remember { mutableStateOf(false) }
 
             androidx.compose.material3.MaterialTheme(
                 colorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()
             ) {
+                if (showSettingsInLogin) {
+                    SettingsDialog(
+                        initialUrl = currentUrl,
+                        isDarkTheme = isDarkTheme,
+                        onThemeChange = { newTheme ->
+                            isDarkTheme = newTheme
+                            prefs.edit().putBoolean("is_dark_theme", newTheme).apply()
+                        },
+                        onDismiss = { showSettingsInLogin = false },
+                        onConfirm = { newUrl ->
+                            updateNetwork(newUrl)
+                            currentUrl = newUrl
+                            showSettingsInLogin = false
+                        }
+                    )
+                }
+
                 val startDest = if (prefs.getString("auth_token", null) != null) "catalog" else "login"
                 NavHost(navController = navController, startDestination = startDest) {
                     composable("login") {
                         val loginViewModel = remember {
-                            LoginViewModel(repository, deviceId) { token ->
+                            LoginViewModel(repository, deviceId!!) { token ->
                                 prefs.edit().putString("auth_token", token).apply()
                                 viewModel.loadData() // refresh data with new token
                                 navController.navigate("catalog") {
@@ -105,11 +123,7 @@ class MainActivity : ComponentActivity() {
                         }
                         LoginScreen(
                             viewModel = loginViewModel,
-                            onOpenSettings = {
-                                // For simplicity, we could just reuse SettingsDialog here if needed,
-                                // but let's navigate to a simple url setup if we want, or just leave it.
-                                // I'll just pass a dummy or implement a standalone one.
-                            }
+                            onOpenSettings = { showSettingsInLogin = true }
                         )
                     }
                     composable("catalog") {
