@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.DarkMode
@@ -50,7 +51,8 @@ fun CatalogScreen(
     isDarkTheme: Boolean,
     onThemeChange: (Boolean) -> Unit,
     onUpdateUrl: (String) -> Unit,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -93,7 +95,7 @@ fun CatalogScreen(
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(if (selectedGroupId != null && searchQuery.isBlank()) currentGroupName ?: "Zebraget" else "ZebraGet Catalog") 
+                    Text(if (selectedGroupId != null && searchQuery.isBlank()) currentGroupName ?: "Zebraget" else "ZebraGet")
                 },
                 navigationIcon = {
                     if (selectedGroupId != null && searchQuery.isBlank()) {
@@ -111,6 +113,9 @@ fun CatalogScreen(
                     }
                     IconButton(onClick = { showInfo = true }) {
                         Icon(Icons.Default.Info, contentDescription = "Info")
+                    }
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
                 }
             )
@@ -355,7 +360,7 @@ fun InfoDialog(onDismiss: () -> Unit) {
         text = {
             Column {
                 Text("ZebraGet", style = MaterialTheme.typography.titleLarge)
-                Text("Версия: 1.2", style = MaterialTheme.typography.bodyMedium)
+                Text("Версия: 1.3", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text("Связь с разработчиком:", style = MaterialTheme.typography.titleMedium)

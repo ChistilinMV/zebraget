@@ -24,6 +24,8 @@ class ProductRepository(
         this.apiService = service
     }
 
+    fun getApiService(): ApiService? = apiService
+
     suspend fun fetchFromNetwork(): Pair<List<Product>, List<ProductGroup>> {
         return withContext(Dispatchers.IO) {
             if (apiService == null) throw IOException("Server not configured")

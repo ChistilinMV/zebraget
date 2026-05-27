@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-30:12
-INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-30:12
-INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-30:12
-INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-30:12
+ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-31:12
+INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-31:12
+INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-31:12
+INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:2:1-31:12
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\d1df347c8adb5cdab1ccca0553e73e7a\workspace\transformed\material-1.11.0\AndroidManifest.xml:17:1-24:12
 MERGED from [io.coil-kt:coil-compose:2.6.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\61a40f38c613addc4c3097b50cb34ce1\workspace\transformed\jetified-coil-compose-2.6.0\AndroidManifest.xml:2:1-7:12
 MERGED from [io.coil-kt:coil-compose-base:2.6.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\2c81b513089651567e505cbe967384c4\workspace\transformed\jetified-coil-compose-base-2.6.0\AndroidManifest.xml:2:1-7:12
@@ -104,8 +104,8 @@ ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:5:5-67
 	android:name
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:5:22-64
 application
-ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:7:5-28:19
-INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:7:5-28:19
+ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:7:5-29:19
+INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:7:5-29:19
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\d1df347c8adb5cdab1ccca0553e73e7a\workspace\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\d1df347c8adb5cdab1ccca0553e73e7a\workspace\transformed\material-1.11.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\90a6f9f4b0dc4ff42c610fc3113e6391\workspace\transformed\constraintlayout-2.0.1\AndroidManifest.xml:9:5-20
@@ -147,23 +147,25 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\MegaLitr\.gradle\c
 	android:usesCleartextTraffic
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:14:9-44
 activity#com.example.zebraget.MainActivity
-ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:19:9-27:20
+ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:19:9-28:20
+	android:windowSoftInputMode
+		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:22:13-55
 	android:exported
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:21:13-36
 	android:theme
-		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:22:13-50
+		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:23:13-50
 	android:name
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:20:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:23:13-26:29
+ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:24:13-27:29
 action#android.intent.action.MAIN
-ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:24:17-69
+ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:25:17-69
 	android:name
-		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:24:25-66
+		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:25:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:25:17-77
+ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:26:17-77
 	android:name
-		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:25:27-74
+		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:26:27-74
 uses-sdk
 INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml

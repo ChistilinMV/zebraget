@@ -232,6 +232,7 @@
         <div class="nav-links">
             <button class="active" onclick="switchTab('products')">Товары</button>
             <button onclick="switchTab('groups')">Группы</button>
+            <button onclick="switchTab('users')">Пользователи</button>
             <button onclick="switchTab('settings')">База</button>
             <button onclick="logout()" style="color: var(--danger); font-weight: bold;">Выйти</button>
         </div>
@@ -348,11 +349,58 @@
             </div>
         </div>
 
+        <!-- USERS TAB -->
+        <div id="users-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 id="userFormTitle">Добавить пользователя</h2>
+                </div>
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="u-name">Логин</label>
+                            <input type="text" id="u-name" required placeholder="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="u-pass">Пароль</label>
+                            <input type="text" id="u-pass" placeholder="Пароль (оставьте пустым для сохранения старого)">
+                        </div>
+                        <div class="form-group">
+                            <label for="u-limit">Лимит устройств</label>
+                            <input type="number" id="u-limit" required min="1" value="2" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 1rem; font-family: inherit;">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary" id="u-submitBtn">Сохранить</button>
+                        <button type="button" class="btn btn-secondary" id="u-cancelBtn" style="display:none;" onclick="resetUserForm()">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Список пользователей</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Логин</th>
+                            <th>Лимит / Активные</th>
+                            <th>Сессии</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- SETTINGS TAB -->
         <div id="settings-tab" class="tab-content">
             <div class="card">
                 <div class="card-header">
-                    <h2>Управление базой данных</h2>
+                    <h2>Управление базой товаров</h2>
                 </div>
                 <p style="color: var(--text-muted); margin-bottom: 2rem;">
                     Здесь вы можете скачать текущую базу данных в формате JSON или XLSX, либо загрузить новую. 
@@ -388,8 +436,10 @@
         // State
         let products = [];
         let groups = [];
+        let usersList = [];
         let isEditingProduct = false;
         let isEditingGroup = false;
+        let isEditingUser = false;
 
         // --- Auth ---
         function getAuthHeaders(extra = {}) {
@@ -453,16 +503,27 @@
         // --- Initialization ---
         async function loadData() {
             try {
-                const [resP, resG] = await Promise.all([
-                    fetch(`${API}/products`),
-                    fetch(`${API}/groups`)
+                const [resP, resG, resU] = await Promise.all([
+                    fetch(`${API}/products`, { headers: getAuthHeaders() }),
+                    fetch(`${API}/groups`, { headers: getAuthHeaders() }),
+                    fetch(`${API}/api/users`, { headers: getAuthHeaders() }).catch(e => ({ ok: false }))
                 ]);
+                
+                handleApiError(resP);
+                
                 products = await resP.json();
                 groups = await resG.json();
+                
+                if (resU && resU.ok) {
+                    usersList = await resU.json();
+                } else {
+                    usersList = [];
+                }
                 
                 renderGroupsSelect();
                 renderProducts();
                 renderGroups();
+                renderUsers();
             } catch (err) {
                 console.error(err);
                 alert('Ошибка загрузки данных. Сервер запущен?');
@@ -710,6 +771,129 @@
             document.getElementById('g-submitBtn').innerText = 'Сохранить';
             document.getElementById('g-cancelBtn').style.display = 'none';
             isEditingGroup = false;
+        };
+
+        // --- User CRUD ---
+        function renderUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            if (!usersList || usersList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Нет пользователей</td></tr>`;
+                return;
+            }
+            usersList.forEach(u => {
+                const sessionsHtml = u.sessions && u.sessions.length > 0 
+                    ? u.sessions.map(s => `<div style="font-size:0.8rem; margin-bottom:4px; display:flex; gap:8px; align-items:center;">
+                        <span>${new Date(s.createdAt).toLocaleString()} (Device: ${s.deviceId.substring(0,8)}...)</span>
+                        <button onclick="revokeSession(${u.id}, '${s.deviceId}')" style="background:var(--danger);color:white;border:none;border-radius:4px;cursor:pointer;padding:2px 6px;">Отвязать</button>
+                      </div>`).join('')
+                    : '<span style="color:var(--text-muted);font-size:0.8rem;">Нет сессий</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${u.username}</b></td>
+                        <td>${u.activeDevices} / ${u.maxDevices}</td>
+                        <td>${sessionsHtml}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm" onclick="editUser(${u.id})">Ред.</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">Удалить</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('userId').value;
+            const payload = {
+                username: document.getElementById('u-name').value,
+                password: document.getElementById('u-pass').value,
+                maxDevices: document.getElementById('u-limit').value
+            };
+            
+            if (!isEditingUser && !payload.password) {
+                alert("Для нового пользователя пароль обязателен");
+                return;
+            }
+
+            const method = isEditingUser ? 'PUT' : 'POST';
+            const url = isEditingUser ? `${API}/api/users/${id}` : `${API}/api/users`;
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                    body: JSON.stringify(payload)
+                });
+                handleApiError(res);
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Ошибка сохранения');
+                }
+                resetUserForm();
+                loadData();
+            } catch (err) {
+                if (err.message !== 'Не авторизован') alert(err.message);
+            }
+        });
+
+        window.editUser = (id) => {
+            const u = usersList.find(x => x.id === id);
+            if(!u) return;
+            document.getElementById('userId').value = u.id;
+            document.getElementById('u-name').value = u.username;
+            document.getElementById('u-name').disabled = true; // don't allow changing username easily
+            document.getElementById('u-pass').value = '';
+            document.getElementById('u-limit').value = u.maxDevices;
+            
+            document.getElementById('userFormTitle').innerText = `Редактировать пользователя`;
+            document.getElementById('u-submitBtn').innerText = 'Обновить';
+            document.getElementById('u-cancelBtn').style.display = 'inline-block';
+            isEditingUser = true;
+            window.scrollTo(0,0);
+        };
+
+        window.deleteUser = async (id) => {
+            if(!confirm('Удалить пользователя?')) return;
+            try {
+                const res = await fetch(`${API}/api/users/${id}`, { 
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                handleApiError(res);
+                if (!res.ok) throw new Error('Ошибка удаления');
+                loadData();
+            } catch (err) {
+                if (err.message !== 'Не авторизован') alert('Ошибка соединения'); 
+            }
+        };
+
+        window.revokeSession = async (userId, deviceId) => {
+            if(!confirm('Отвязать устройство? Клиент будет разлогинен.')) return;
+            try {
+                const res = await fetch(`${API}/api/users/${userId}/sessions/${deviceId}`, { 
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                handleApiError(res);
+                if (!res.ok) throw new Error('Ошибка отзыва');
+                loadData();
+            } catch (err) {
+                if (err.message !== 'Не авторизован') alert('Ошибка соединения'); 
+            }
+        }
+
+        window.resetUserForm = () => {
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('u-name').disabled = false;
+            document.getElementById('userFormTitle').innerText = 'Добавить пользователя';
+            document.getElementById('u-submitBtn').innerText = 'Сохранить';
+            document.getElementById('u-cancelBtn').style.display = 'none';
+            isEditingUser = false;
         };
 
         // --- Import / Export ---
