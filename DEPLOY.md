@@ -25,55 +25,54 @@
 
 Если Node.js еще не установлен, выполните команды:
 
-bash
-
+```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-
 sudo apt-get install -y nodejs
+```
 
 ### 2. Установка зависимостей проекта
 
 Перейдите в папку с проектом и установите пакеты:
 
-bash
-
+```bash
 cd /opt/zebraget-web
-
 npm install
+```
+
+Так как мы копируем файлы package.json и package-lock.json, команда npm install, запущенная на самом сервере, автоматически скачает и установит в новую папку node_modules абсолютно все необходимые зависимости правильных версий и скомпилирует их под операционную систему вашего сервера. Никаких дополнительных модулей вручную ставить не придется.
 
 ### 3. Установка PM2
 
 Установите менеджер процессов PM2 глобально:
 
-bash
-
+```bash
 sudo npm install pm2 -g
+```
 
 ### 4. Запуск сервера через PM2
 
 Запустите `server-express.js` через PM2:
 
-bash
-
+```bash
 pm2 start server-express.js --name "zebraget-api"
+```
 
 ### 5. Настройка автозапуска
 
 Чтобы сервер автоматически стартовал при перезагрузке машины, выполните:
 
-bash
-
+```bash
 pm2 startup
+```
 
 Вам выдаст команду (начинающуюся с `sudo env PATH...`), которую нужно скопировать и выполнить в терминале. После этого сохраните текущий список процессов:
 
-bash
-
+```bash
 pm2 save
+```
 
-TIP
-
-**Открытие порта (Firewall):** Если у вас включен UFW, не забудьте открыть порт 3000: `sudo ufw allow 3000/tcp`
+> [!TIP]
+> **Открытие порта (Firewall):** Если у вас включен UFW, не забудьте открыть порт 3000: `sudo ufw allow 3000/tcp`
 
 ---
 
@@ -87,42 +86,36 @@ TIP
 
 Откройте PowerShell от имени Администратора, перейдите в папку с проектом и установите пакеты:
 
-powershell
-
+```powershell
 cd C:\zebraget-web
-
 npm install
+```
 
 ### 3. Установка PM2 и настройка Windows Service
 
 Установите PM2 и специальный пакет `pm2-windows-service` для создания службы:
 
-powershell
-
+```powershell
 npm install pm2 -g
-
 npm install pm2-windows-startup -g
-
 pm2-startup install
+```
 
 ### 4. Запуск сервера через PM2
 
 Запустите сервер и сохраните конфигурацию:
 
-powershell
-
+```powershell
 pm2 start server-express.js --name "zebraget-api"
-
 pm2 save
+```
 
 Теперь сервер работает в фоне и переживет перезагрузку Windows.
 
-IMPORTANT
-
-**Открытие порта в Брандмауэре Windows:** По умолчанию Windows блокирует входящие подключения к нестандартным портам.
-
-1. Откройте PowerShell от имени Администратора.
-2. Выполните команду: `New-NetFirewallRule -DisplayName "Zebraget API Port 3000" -Direction Inbound -LocalPort 3000 -Protocol TCP -Action Allow`
+> [!IMPORTANT]
+> **Открытие порта в Брандмауэре Windows:** По умолчанию Windows блокирует входящие подключения к нестандартным портам.
+> 1. Откройте PowerShell от имени Администратора.
+> 2. Выполните команду: `New-NetFirewallRule -DisplayName "Zebraget API Port 3000" -Direction Inbound -LocalPort 3000 -Protocol TCP -Action Allow`
 
 ---
 
