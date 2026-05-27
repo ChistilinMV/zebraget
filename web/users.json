@@ -14,5 +14,9 @@
       "deviceId": "18a20791-258c-4863-9c91-043e1673c960",
       "createdAt": 1779863297669
     }
-  ]
+  ],
+  "system": {
+    "adminPassword": "Admin123*",
+    "superadminPassword": "SuperOwner123!"
+  }
 }

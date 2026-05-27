@@ -63,15 +63,22 @@ writeDB(db);
 let usersDb = readUsersDB();
 if (!usersDb.users) usersDb.users = [];
 if (!usersDb.sessions) usersDb.sessions = [];
+if (!usersDb.system) {
+    usersDb.system = {
+        adminPassword: process.env.ADMIN_PASSWORD || 'Admin123*',
+        superadminPassword: 'SuperOwner123!'
+    };
+}
 writeUsersDB(usersDb);
 
 // --- AUTHENTICATION ---
-const activeTokens = new Set();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Mva5n$M9';
+let activeTokens = new Set();
+const activeSuperTokens = new Set();
 
 app.post('/api/login', (req, res) => {
     const { password } = req.body;
-    if (password === ADMIN_PASSWORD) {
+    const currentAdminPassword = readUsersDB().system.adminPassword;
+    if (password === currentAdminPassword) {
         const token = crypto.randomBytes(32).toString('hex');
         activeTokens.add(token);
         res.json({ success: true, token });
@@ -94,6 +101,59 @@ const requireAuth = (req, res, next) => {
     }
     next();
 };
+
+const requireSuperAuth = (req, res, next) => {
+    let token;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (!token || !activeSuperTokens.has(token)) {
+        return res.status(401).json({ error: 'Не авторизован как суперадминистратор' });
+    }
+    next();
+};
+
+// --- SUPERADMIN API ---
+app.post('/api/superadmin/login', (req, res) => {
+    const { password } = req.body;
+    const currentSuperPassword = readUsersDB().system.superadminPassword;
+    if (password === currentSuperPassword) {
+        const token = crypto.randomBytes(32).toString('hex');
+        activeSuperTokens.add(token);
+        res.json({ success: true, token });
+    } else {
+        res.status(401).json({ error: 'Неверный пароль' });
+    }
+});
+
+app.post('/api/superadmin/change-admin-password', requireSuperAuth, (req, res) => {
+    const { newPassword } = req.body;
+    if (!newPassword) return res.status(400).json({ error: 'Пароль не может быть пустым' });
+    
+    const uDb = readUsersDB();
+    uDb.system.adminPassword = newPassword;
+    writeUsersDB(uDb);
+    
+    // Clear all existing admin tokens to log them out
+    activeTokens = new Set();
+    
+    res.json({ success: true });
+});
+
+app.post('/api/superadmin/change-super-password', requireSuperAuth, (req, res) => {
+    const { newPassword } = req.body;
+    if (!newPassword) return res.status(400).json({ error: 'Пароль не может быть пустым' });
+    
+    const uDb = readUsersDB();
+    uDb.system.superadminPassword = newPassword;
+    writeUsersDB(uDb);
+    
+    res.json({ success: true });
+});
 
 const requireClientOrAdminAuth = (req, res, next) => {
     let token;
@@ -371,4 +431,5 @@ app.listen(PORT, () => {
     console.log(`Express server running on port ${PORT}`);
     console.log(`API at http://localhost:${PORT}/products and /groups`);
     console.log(`Admin at http://localhost:${PORT}/admin.html`);
+    console.log(`Superadmin at http://localhost:${PORT}/superadmin.html`);
 });
