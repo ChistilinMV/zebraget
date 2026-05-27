@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.zebraget.app-mergeDebugResources-66:/values/values.xml",
+            "outputFile": "com.megalitr.zebraget.app-mergeDebugResources-66:/values/values.xml",
             "map": [
                 {
                     "source": "C:\\Users\\MegaLitr\\.gradle\\caches\\9.3.0\\transforms\\3f833e66c37a7a8703f8c227fc312de2\\workspace\\transformed\\jetified-ui-graphics-release\\res\\values\\values.xml",

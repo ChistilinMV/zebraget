@@ -146,7 +146,7 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\MegaLitr\.gradle\c
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:13:9-46
 	android:usesCleartextTraffic
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:14:9-44
-activity#com.example.zebraget.MainActivity
+activity#com.megalitr.zebraget.MainActivity
 ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:19:9-28:20
 	android:windowSoftInputMode
 		ADDED from C:\projects\zebraget\android\app\src\main\AndroidManifest.xml:22:13-55
@@ -384,7 +384,7 @@ ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\tr
 		ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
 	android:name
 		ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
-permission#com.example.zebraget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+permission#com.megalitr.zebraget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
 		ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
@@ -394,7 +394,7 @@ uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
-uses-permission#com.example.zebraget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission#com.megalitr.zebraget.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.13.1] C:\Users\MegaLitr\.gradle\caches\9.3.0\transforms\163b677ec06984e49c749e0e3d154974\workspace\transformed\core-1.13.1\AndroidManifest.xml:26:22-94

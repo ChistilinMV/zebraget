@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.zebraget"
+    namespace = "com.megalitr.zebraget"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.zebraget"
+        applicationId = "com.megalitr.zebraget"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
