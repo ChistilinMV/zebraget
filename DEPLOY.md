@@ -143,7 +143,7 @@ IMPORTANT
 
 **Пример минимального конфига для Nginx (Linux):**
 
-nginx
+```nginx
 
 server {
 
@@ -168,4 +168,4 @@ server {
     }
 
 }
-
+```
